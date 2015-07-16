@@ -1,5 +1,9 @@
 package OSCDispatching;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.net.DatagramPacket;
 
 import org.slf4j.Logger;
@@ -109,7 +113,7 @@ public class OSCSocketIODispatcher implements IOSCDispatcher {
 	}
 
 	private static int parsePort(String... args) {
-		if (!(args.length == 2 && args[0].equals("-p"))) {
+		if (!(args.length == 2 && (args[0].equals("-p") || args[0].equals("--port")))) {
 			log.error("Mailformed program arguments");
 			return -1;
 		}
@@ -132,6 +136,30 @@ public class OSCSocketIODispatcher implements IOSCDispatcher {
 		OSCSocketIODispatcher oscdispatcher = new OSCSocketIODispatcher(oscPort);
 		oscdispatcher.startSocketIOServer();
 		oscdispatcher.connect();
-		log.info("OSC Dispatcher Running..");
+		log.info("OSC Dispatcher Running..");		
+		try {
+			while(true) {
+				Thread.sleep(100);
+				BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+				String userCommand = reader.readLine();
+				if(userCommand.equals("restart")) {
+					log.info("Restarting OSC Dispatcher...");
+					oscdispatcher.disconnect();
+					oscdispatcher.stopSocketIOServer();
+					Thread.sleep(100);
+					oscdispatcher = new OSCSocketIODispatcher(oscPort);
+					oscdispatcher.startSocketIOServer();
+					oscdispatcher.connect();
+					log.info("OSC Dispatcher Restarted and Running..");
+				}
+			}
+			
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			oscdispatcher.disconnect();
+			oscdispatcher.stopSocketIOServer();
+			e.printStackTrace();
+		}
 	}
 }
