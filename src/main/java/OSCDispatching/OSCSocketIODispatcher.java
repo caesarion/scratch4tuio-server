@@ -17,8 +17,10 @@ import com.corundumstudio.socketio.listener.DisconnectListener;
 
 public class OSCSocketIODispatcher implements IOSCDispatcher {
 
+    public static final int DEFAULT_PORT = 3333;
+
 	private static final Logger log = LoggerFactory.getLogger("OSCSocketIODispatcher");
-	
+
 	// the standard port is 3333
 	private int oscPort;
 	private OSCDatagramPort oscDatagramPort;
@@ -53,7 +55,7 @@ public class OSCSocketIODispatcher implements IOSCDispatcher {
 	public void startSocketIOServer() {
 		if (server != null && !startedIOServer) {
 			server.start();
-			startedIOServer = true;	
+			startedIOServer = true;
 			log.debug("Started socket.io server");
 		}
 	}
@@ -68,7 +70,7 @@ public class OSCSocketIODispatcher implements IOSCDispatcher {
 
 	public void dispatchOSCMessage(DatagramPacket packet) {
 		for (SocketIOClient client : server.getAllClients()) {
-			client.sendEvent("osc", packet);			
+			client.sendEvent("osc", packet);
 		}
 	}
 
@@ -114,8 +116,8 @@ public class OSCSocketIODispatcher implements IOSCDispatcher {
 
 	private static int parsePort(String... args) {
 		if (!(args.length == 2 && (args[0].equals("-p") || args[0].equals("--port")))) {
-			log.error("Mailformed program arguments");
-			return -1;
+			// log.error("Mailformed program arguments");
+			return DEFAULT_PORT;
 		}
 		try {
 			return Integer.parseInt(args[1]);
@@ -123,7 +125,6 @@ public class OSCSocketIODispatcher implements IOSCDispatcher {
 			log.error("The port argument -p is not of type int!");
 			return -1;
 		}
-
 	}
 
 	public static void main(String[] args) throws InterruptedException {
@@ -136,7 +137,7 @@ public class OSCSocketIODispatcher implements IOSCDispatcher {
 		OSCSocketIODispatcher oscdispatcher = new OSCSocketIODispatcher(oscPort);
 		oscdispatcher.startSocketIOServer();
 		oscdispatcher.connect();
-		log.info("OSC Dispatcher Running..");		
+		log.info("OSC Dispatcher Running..");
 		try {
 			while(true) {
 				Thread.sleep(100);
@@ -153,8 +154,8 @@ public class OSCSocketIODispatcher implements IOSCDispatcher {
 					log.info("OSC Dispatcher Restarted and Running..");
 				}
 			}
-			
-			
+
+
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			oscdispatcher.disconnect();
