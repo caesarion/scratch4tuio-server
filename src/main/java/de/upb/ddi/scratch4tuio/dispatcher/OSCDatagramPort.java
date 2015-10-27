@@ -1,4 +1,4 @@
-package OSCDispatching;
+package de.upb.ddi.scratch4tuio.dispatcher;
 
 import java.io.IOException;
 import java.net.DatagramPacket;

@@ -1,4 +1,4 @@
-package OSCDispatching;
+package de.upb.ddi.scratch4tuio.dispatcher;
 
 import java.net.DatagramPacket;
 
