@@ -1,8 +1,5 @@
 package de.upb.ddi.scratch4tuio.dispatcher;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.DatagramPacket;
 
 import org.slf4j.Logger;
@@ -16,9 +13,7 @@ import com.corundumstudio.socketio.listener.DisconnectListener;
 
 public class OSCSocketIODispatcher implements IOSCDispatcher {
 
-    public static final int DEFAULT_PORT = 3333;
-
-	private static final Logger log = LoggerFactory.getLogger("OSCSocketIODispatcher");
+    private static final Logger log = LoggerFactory.getLogger(OSCSocketIODispatcher.class);
 
 	// the standard port is 3333
 	private int oscPort;
@@ -36,17 +31,17 @@ public class OSCSocketIODispatcher implements IOSCDispatcher {
 
 		server = new SocketIOServer(config);
 		server.addConnectListener(new ConnectListener() {
-
 			@Override
 			public void onConnect(SocketIOClient client) {
-				log.info("client connected");
+				log.info("New client connected");
+                log.debug(client.toString());
 			}
 		});
 		server.addDisconnectListener(new DisconnectListener() {
-
 			@Override
 			public void onDisconnect(SocketIOClient client) {
-				log.info("client disconnected");
+				log.info("A client disconnected");
+                log.debug(client.toString());
 			}
 		});
 	}
@@ -99,7 +94,7 @@ public class OSCSocketIODispatcher implements IOSCDispatcher {
 			Thread.sleep(100);
 		} catch (Exception e) {
 		}
-		;
+
 		oscDatagramPort.close();
 		setConnectedToOSC(false);
 		log.info("Disconnected UDP connection to OSC-Server");
@@ -113,53 +108,5 @@ public class OSCSocketIODispatcher implements IOSCDispatcher {
 		this.connectedToOSC = connectedToOSC;
 	}
 
-	private static int parsePort(String... args) {
-		if (!(args.length == 2 && (args[0].equals("-p") || args[0].equals("--port")))) {
-			// log.error("Mailformed program arguments");
-			return DEFAULT_PORT;
-		}
-		try {
-			return Integer.parseInt(args[1]);
-		} catch (NumberFormatException e) {
-			log.error("The port argument -p is not of type int!");
-			return -1;
-		}
-	}
 
-	public static void main(String[] args) throws InterruptedException {
-		log.info("Try Starting OSC Dispatcher");
-		int oscPort = parsePort(args);
-		if (oscPort < 0) {
-			log.error("program arguments not valid. Shutdown server.");
-			return;
-		}
-		OSCSocketIODispatcher oscdispatcher = new OSCSocketIODispatcher(oscPort);
-		oscdispatcher.startSocketIOServer();
-		oscdispatcher.connect();
-		log.info("OSC Dispatcher Running..");
-		try {
-			while(true) {
-				Thread.sleep(100);
-				BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-				String userCommand = reader.readLine();
-				if(userCommand.equals("restart")) {
-					log.info("Restarting OSC Dispatcher...");
-					oscdispatcher.disconnect();
-					oscdispatcher.stopSocketIOServer();
-					Thread.sleep(100);
-					oscdispatcher = new OSCSocketIODispatcher(oscPort);
-					oscdispatcher.startSocketIOServer();
-					oscdispatcher.connect();
-					log.info("OSC Dispatcher Restarted and Running..");
-				}
-			}
-
-
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			oscdispatcher.disconnect();
-			oscdispatcher.stopSocketIOServer();
-			e.printStackTrace();
-		}
-	}
 }
