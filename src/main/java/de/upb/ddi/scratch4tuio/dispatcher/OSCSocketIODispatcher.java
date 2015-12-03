@@ -50,7 +50,7 @@ public class OSCSocketIODispatcher implements IOSCDispatcher {
 		if (server != null && !startedIOServer) {
 			server.start();
 			startedIOServer = true;
-			log.debug("Started socket.io server");
+			log.debug("Started socket.io server on localhost:5000");
 		}
 	}
 
